@@ -10,7 +10,7 @@
   "scripts": {
     "test": "vitest run",
     "test:watch": "vitest",
-    "dev": "npx --yes serve@14 ."
+    "dev": "node scripts/servidor.mjs"
   },
   "keywords": [
     "juegos-imperiales",

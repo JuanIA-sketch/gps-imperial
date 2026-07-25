@@ -2,56 +2,82 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>GPS Imperial — encuentra tu primer proyecto</title>
 <meta name="description" content="Diagnóstico de 4 preguntas que recomienda UN proyecto concreto para empezar y terminar. Sin listas, sin IA: un árbol de decisión determinístico.">
+<meta name="theme-color" content="#0A0F1A">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
 <link rel="stylesheet" href="web/estilos.css">
 </head>
 <body>
-<div class="wrap">
 
-  <header class="top">
-    <p class="eyebrow">Imperio Agéntico · Juegos Imperiales</p>
-    <h1>GPS Imperial</h1>
-    <p class="sub">El GPS decide la ruta, no te pregunta el destino. Responde para quién es esto y qué te duele — nosotros inferimos qué construir.</p>
-  </header>
+<div class="escena">
 
-  <div class="route">
-    <div
-      class="route-track"
-      id="route-track"
-      role="progressbar"
-      aria-label="Avance del diagnóstico"
-      aria-valuemin="0"
-      aria-valuemax="100"
-      aria-valuenow="0"
-    >
-      <div class="route-fill" id="route-fill"></div>
-    </div>
-    <div class="route-pin" aria-hidden="true">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s7-6.5 7-12a7 7 0 1 0-14 0c0 5.5 7 12 7 12z"/><circle cx="12" cy="9" r="2.5"/></svg>
-    </div>
-    <p class="route-label" id="route-label" role="status">Paso 1 de 4</p>
+  <!-- Capa 1: la red vial. Ambiente, no información: se recorta a sangre. -->
+  <svg class="calles" viewBox="0 0 1000 1000" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">
+    <g class="calles-trazo">
+      <path d="M-50 180 C 180 150, 320 250, 520 220 S 880 130, 1080 190"/>
+      <path d="M-50 420 C 220 460, 300 360, 540 400 S 860 470, 1080 410"/>
+      <path d="M-50 700 C 200 660, 380 780, 600 730 S 900 660, 1080 720"/>
+      <path d="M-50 900 C 260 940, 420 850, 660 900 S 900 960, 1080 910"/>
+      <path d="M140 -50 C 110 200, 200 340, 170 560 S 90 840, 130 1080"/>
+      <path d="M420 -50 C 460 220, 380 380, 430 620 S 470 880, 420 1080"/>
+      <path d="M700 -50 C 660 180, 750 400, 710 640 S 640 900, 700 1080"/>
+      <path d="M900 -50 C 940 240, 860 460, 920 700 S 950 900, 890 1080"/>
+      <path d="M-50 40 L 1080 40" class="calles-fina"/>
+      <path d="M-50 560 L 1080 560" class="calles-fina"/>
+      <path d="M260 -50 L 260 1080" class="calles-fina"/>
+      <path d="M820 -50 L 820 1080" class="calles-fina"/>
+    </g>
+  </svg>
+
+  <!-- Capa 2: la ruta. Es la pantalla, no un adorno: se ve completa siempre.
+       El avance real se anuncia por texto en #estado-viaje, no por el dibujo. -->
+  <div class="lienzo-ruta">
+    <svg class="ruta" viewBox="6 12 86 100" preserveAspectRatio="xMidYMid meet" aria-hidden="true" focusable="false">
+      <defs>
+        <filter id="resplandor" x="-60%" y="-60%" width="220%" height="220%">
+          <feGaussianBlur stdDeviation="0.8" result="borroso"/>
+          <feMerge><feMergeNode in="borroso"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+      </defs>
+
+      <!-- El "d" lo genera mapa.js: la carretera depende de la rama (3 o 4
+           maniobras), así que no puede estar escrita a mano aquí.
+           Son dos trazados con la misma "d" —el asfalto y el tramo recorrido—
+           duplicados a propósito y no con <use>: el clon de <use> arrastra la
+           clase del original y el color oscuro le ganaría al verde. -->
+      <path id="ruta-trazado" class="ruta-base"/>
+      <path id="ruta-hecha" class="ruta-hecha"/>
+
+      <!-- Los radios los fija mapa.js en píxeles reales: el SVG se escala
+           mucho entre móvil y escritorio y un radio fijo se vería diminuto
+           en una punta y enorme en la otra. -->
+      <g id="paradas" class="paradas"></g>
+      <g id="pin" class="pin">
+        <circle class="pin-onda"/>
+        <circle class="pin-halo"/>
+        <circle class="pin-nucleo"/>
+      </g>
+    </svg>
   </div>
 
-  <main id="app"></main>
+  <!-- Capa 3: identidad. Esquina, como la firma de un mapa — no un hero. -->
+  <div class="marca">
+    <p class="marca-nombre">GPS Imperial</p>
+    <p class="marca-serie">Imperio Agéntico · Juegos Imperiales</p>
+    <p class="marca-lema">El GPS decide la ruta, no te pregunta el destino. Responde para quién es esto y qué te duele — nosotros inferimos qué construir.</p>
+  </div>
 
-  <section class="banco" aria-labelledby="banco-titulo">
-    <div class="banco-head">
-      <h2 id="banco-titulo">Así se ve un proyecto terminado</h2>
-      <p>No es un portafolio — son ejemplos reales de la comunidad para calibrar qué significa "terminado" antes de que construyas el tuyo.</p>
-      <p class="banco-cta">¿Ya terminaste el tuyo? Publícalo como Logro y pide que lo sumen aquí — el envío automático todavía no existe, esto se cura a mano por ahora.</p>
-    </div>
-    <ul class="banco-grid" id="banco-grid"></ul>
-  </section>
+  <p class="credito">Determinístico de punta a punta: mismas respuestas, misma recomendación. Sin IA, sin API keys, sin datos que salgan de tu navegador.</p>
 
-  <footer class="pie">
-    <p>Determinístico de punta a punta: mismas respuestas, misma recomendación. Sin IA, sin API keys, sin datos que salgan de tu navegador.</p>
-  </footer>
+  <!-- Capa 4: la tarjeta de maniobra. Flota sobre el mapa. -->
+  <main class="panel" id="app"></main>
+
+  <p class="solo-lectores" role="status" id="estado-viaje"></p>
 
 </div>
 
