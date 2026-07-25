@@ -207,16 +207,9 @@ body {
   animation: latido 2.6s ease-out infinite;
 }
 
-.pin-llegado .ruta-recalculada {
-  animation: recalcular 280ms ease-out;
-}
-
-@keyframes recalcular {
-  from { opacity: 0.15; }
-  to { opacity: 1; }
-}
-
-.pin-nucleo {
+/* Verde mientras viajas, ámbar al llegar: es la única señal de color que
+   distingue "vas en camino" de "llegaste". */
+.pin-llegado .pin-nucleo {
   fill: var(--maniobra);
 }
 
