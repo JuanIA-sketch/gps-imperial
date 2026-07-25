@@ -77,6 +77,21 @@
   <!-- Capa 4: la tarjeta de maniobra. Flota sobre el mapa. -->
   <main class="panel" id="app"></main>
 
+  <!-- El banco ya no vive dentro del destino: se consulta desde cualquier
+       parada del viaje, sin perder la posición en el diagnóstico.
+       Va DESPUÉS del panel en el marcado, aunque se dibuje en una esquina:
+       con Tab primero se contesta la pregunta y después se sale a mirar
+       ejemplos, no al revés. -->
+  <button class="banco-abrir" type="button" id="abrir-banco" title="Banco de proyectos">
+    <svg class="banco-abrir-glifo" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path d="M4 20V9l8-5 8 5v11 M3 20h18 M9.5 20v-5.5h5V20"/>
+    </svg>
+    <span>Banco de proyectos</span>
+  </button>
+
+  <!-- Lo llena `app.js` una sola vez: el banco no depende del diagnóstico. -->
+  <dialog class="banco-dialogo" id="banco-dialogo" aria-labelledby="banco-titulo"></dialog>
+
   <p class="solo-lectores" role="status" id="estado-viaje"></p>
 
 </div>

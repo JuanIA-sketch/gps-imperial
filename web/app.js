@@ -11,13 +11,17 @@
 import { crearMotor } from '../src/motor.js';
 import { BANCO } from '../src/banco.js';
 import { crearMapa } from './mapa.js';
+import { crearHoja } from './hoja.js';
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
 
 const motor = crearMotor();
 const app = document.getElementById('app');
 const estadoViaje = document.getElementById('estado-viaje');
+const dialogoBanco = document.getElementById('banco-dialogo');
+const abrirBanco = document.getElementById('abrir-banco');
 const mapa = crearMapa();
+const hoja = crearHoja(app);
 
 /** El primer pintado no debe robarle el foco a nadie; los siguientes sí. */
 let esPrimerPintado = true;
@@ -173,7 +177,11 @@ function pintarBanco() {
   }
 
   return crear('section', { clase: 'banco' }, [
-    crear('h2', { clase: 'banco-titulo', texto: 'Así se ve un proyecto terminado' }),
+    crear('h2', {
+      clase: 'banco-titulo',
+      texto: 'Así se ve un proyecto terminado',
+      atributos: { id: 'banco-titulo', tabindex: '-1' },
+    }),
     crear('p', {
       clase: 'banco-intro',
       texto:
@@ -186,6 +194,42 @@ function pintarBanco() {
     }),
     lista,
   ]);
+}
+
+/**
+ * El banco, en un diálogo modal.
+ *
+ * Se monta una sola vez: no depende de ninguna respuesta, así que repintarlo
+ * en cada parada sería trabajo tirado. `showModal()` da gratis el cierre con
+ * Esc, la trampa de foco y la devolución del foco al botón que lo abrió —
+ * escribir eso a mano sería peor y más frágil.
+ */
+function montarBanco() {
+  const cerrar = crear('button', {
+    clase: 'banco-cerrar',
+    texto: 'Cerrar',
+    atributos: { type: 'button' },
+  });
+  cerrar.addEventListener('click', () => dialogoBanco.close());
+
+  // El botón de cerrar es hermano del área que scrollea, no hijo: así se queda
+  // quieto en la esquina mientras la lista corre por debajo.
+  dialogoBanco.replaceChildren(
+    cerrar,
+    crear('div', { clase: 'banco-hoja' }, [pintarBanco()]),
+  );
+
+  abrirBanco.addEventListener('click', () => {
+    dialogoBanco.showModal();
+    // El primer tabulador debería caer dentro del diálogo, no en el botón de
+    // cerrar: el título es el punto de entrada de la lectura.
+    dialogoBanco.querySelector('#banco-titulo')?.focus({ preventScroll: true });
+  });
+
+  // Clic en el fondo, fuera de la hoja: el gesto que todo el mundo intenta.
+  dialogoBanco.addEventListener('click', (evento) => {
+    if (evento.target === dialogoBanco) dialogoBanco.close();
+  });
 }
 
 function pintarDestino() {
@@ -232,6 +276,15 @@ function pintarDestino() {
     ficha('Cómo validarlo', recomendacion.validacion),
   ]);
 
+  // "Próximos pasos" va pegado al resultado, antes de los siete campos: es lo
+  // único accionable de esta pantalla y quedaba bajo la línea de flotación en
+  // los cinco viewports. Lo detallado se lee después, y quien quiera lo
+  // alcanza scrolleando el panel.
+  const proximosPasos = crear('section', { clase: 'bloque bloque-pasos' }, [
+    crear('h2', { clase: 'bloque-titulo', texto: 'Próximos pasos' }),
+    pasos,
+  ]);
+
   return crear('section', { clase: 'tarjeta tarjeta-destino' }, [
     crear('div', { clase: 'llegada' }, [
       crear('span', { clase: 'llegada-glifo' }, [icono('', GLIFO_DESTINO)]),
@@ -243,15 +296,11 @@ function pintarDestino() {
       texto: recomendacion.title,
       atributos: { tabindex: '-1', id: 'paso-actual' },
     }),
+    proximosPasos,
     enPractica,
     datos,
     conQue,
-    crear('section', { clase: 'bloque' }, [
-      crear('h2', { clase: 'bloque-titulo', texto: 'Próximos pasos' }),
-      pasos,
-    ]),
     controles,
-    pintarBanco(),
   ]);
 }
 
@@ -266,7 +315,12 @@ function pintar() {
     ? 'Has llegado a tu destino.'
     : `Parada ${estado.paso} de ${estado.totalPasos}.`;
 
+  // Solo el destino scrollea por dentro. Una pregunta que necesitara scroll
+  // sería una pregunta demasiado larga, no un panel demasiado corto.
+  app.classList.toggle('panel-destino', estado.terminado);
+
   app.replaceChildren(
+    hoja.tirador,
     estado.terminado ? pintarDestino() : pintarPregunta(estado),
   );
 
@@ -285,4 +339,5 @@ function pintar() {
   app.scrollTop = 0;
 }
 
+montarBanco();
 pintar();
