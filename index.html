@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GPS Imperial — encuentra tu primer proyecto</title>
+<meta name="description" content="Diagnóstico de 4 preguntas que recomienda UN proyecto concreto para empezar y terminar. Sin listas, sin IA: un árbol de decisión determinístico.">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="web/estilos.css">
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <p class="eyebrow">Imperio Agéntico · Juegos Imperiales</p>
+    <h1>GPS Imperial</h1>
+    <p class="sub">El GPS decide la ruta, no te pregunta el destino. Responde para quién es esto y qué te duele — nosotros inferimos qué construir.</p>
+  </header>
+
+  <div class="route">
+    <div
+      class="route-track"
+      id="route-track"
+      role="progressbar"
+      aria-label="Avance del diagnóstico"
+      aria-valuemin="0"
+      aria-valuemax="100"
+      aria-valuenow="0"
+    >
+      <div class="route-fill" id="route-fill"></div>
+    </div>
+    <div class="route-pin" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s7-6.5 7-12a7 7 0 1 0-14 0c0 5.5 7 12 7 12z"/><circle cx="12" cy="9" r="2.5"/></svg>
+    </div>
+    <p class="route-label" id="route-label" role="status">Paso 1 de 4</p>
+  </div>
+
+  <main id="app"></main>
+
+  <section class="banco" aria-labelledby="banco-titulo">
+    <div class="banco-head">
+      <h2 id="banco-titulo">Así se ve un proyecto terminado</h2>
+      <p>No es un portafolio — son ejemplos reales de la comunidad para calibrar qué significa "terminado" antes de que construyas el tuyo.</p>
+      <p class="banco-cta">¿Ya terminaste el tuyo? Publícalo como Logro y pide que lo sumen aquí — el envío automático todavía no existe, esto se cura a mano por ahora.</p>
+    </div>
+    <ul class="banco-grid" id="banco-grid"></ul>
+  </section>
+
+  <footer class="pie">
+    <p>Determinístico de punta a punta: mismas respuestas, misma recomendación. Sin IA, sin API keys, sin datos que salgan de tu navegador.</p>
+  </footer>
+
+</div>
+
+<script type="module" src="web/app.js"></script>
+</body>
+</html>

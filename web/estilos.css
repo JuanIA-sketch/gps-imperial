@@ -1,0 +1,447 @@
+/*
+  GPS Imperial — sistema visual.
+  Paleta, tipografías y ritmo vienen del prototipo validado en vivo
+  (gps-imperial-mvp.html). Lo que se agregó aquí: foco visible en TODOS los
+  botones, reduced-motion completo y responsive real hasta 320px.
+*/
+
+:root {
+  --ink: #12213B;
+  --paper: #EDEFF3;
+  --paper-2: #FFFFFF;
+  --line: #C7CDDA;
+  --amber: #E8823D;
+  --amber-wash: #FBF3EB;
+  --teal: #3FA796;
+  --text: #1B2A4A;
+  --text-dim: #5B6A87;
+
+  /* El ámbar y el verde del prototipo son acentos: como TEXTO chico no llegan
+     a 4.5:1. Estas dos variantes mantienen el tono y sí pasan AA. Los colores
+     originales se quedan donde no cargan texto: bordes, relleno de la barra,
+     el pin. */
+  --amber-text: #A8500F;
+  --teal-text: #2A7568;
+
+  --font-display: 'Space Grotesk', 'Archivo', sans-serif;
+  --font-body: 'Inter', 'Public Sans', sans-serif;
+  --font-mono: 'IBM Plex Mono', 'Courier New', monospace;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--paper);
+  color: var(--text);
+  font-family: var(--font-body);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  /* Ninguna palabra larga debe empujar la página a lo ancho en móvil. */
+  overflow-wrap: break-word;
+}
+
+.wrap {
+  max-width: 820px;
+  margin: 0 auto;
+  padding: 48px 24px 96px;
+}
+
+/* Un solo estilo de foco, para todo lo enfocable. */
+:is(button, a, [tabindex]):focus-visible {
+  outline: 2px solid var(--amber);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+/* Los encabezados reciben foco al cambiar de paso, pero no dibujan anillo:
+   ese foco es programático, no lo pidió el teclado. */
+h2[tabindex="-1"]:focus {
+  outline: none;
+}
+
+/* ---------- Encabezado ---------- */
+
+header.top {
+  margin-bottom: 32px;
+}
+
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--amber-text);
+  margin-bottom: 10px;
+}
+
+h1 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(28px, 5vw, 42px);
+  color: var(--ink);
+  letter-spacing: -0.01em;
+  margin-bottom: 12px;
+}
+
+.sub {
+  color: var(--text-dim);
+  font-size: 16px;
+  max-width: 56ch;
+}
+
+/* ---------- Ruta: el elemento de firma ---------- */
+
+.route {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 32px 0 40px;
+}
+
+.route-track {
+  flex: 1;
+  height: 2px;
+  background: var(--line);
+  position: relative;
+  border-radius: 2px;
+}
+
+.route-fill {
+  height: 100%;
+  width: 0%;
+  background: var(--teal);
+  border-radius: 2px;
+  transition: width 0.45s cubic-bezier(.4, 0, .2, 1);
+}
+
+.route-pin {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  color: var(--amber);
+}
+
+.route-pin svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.route-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-dim);
+  white-space: nowrap;
+}
+
+/* ---------- Tarjeta y preguntas ---------- */
+
+.card {
+  background: var(--paper-2);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 36px;
+}
+
+.qtext {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 22px;
+  line-height: 1.35;
+  color: var(--ink);
+  margin-bottom: 24px;
+}
+
+.options {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.opt {
+  text-align: left;
+  width: 100%;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  padding: 14px 18px;
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.4;
+  color: var(--text);
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.opt:hover {
+  border-color: var(--amber);
+  background: var(--amber-wash);
+}
+
+.nav-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-top: 24px;
+}
+
+.back-btn {
+  background: none;
+  border: none;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--text-dim);
+  cursor: pointer;
+  padding: 8px 4px;
+}
+
+.back-btn:hover {
+  color: var(--ink);
+}
+
+/* ---------- Resultado ---------- */
+
+.result-tag {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--teal-text);
+  margin-bottom: 10px;
+}
+
+.result-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(22px, 4vw, 28px);
+  line-height: 1.25;
+  color: var(--ink);
+  margin-bottom: 20px;
+}
+
+.field {
+  margin-bottom: 18px;
+}
+
+.field-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: 4px;
+}
+
+.field-value {
+  font-size: 15px;
+  color: var(--text);
+}
+
+.pasos {
+  counter-reset: step;
+  margin-top: 8px;
+  padding-left: 0;
+  list-style: none;
+}
+
+.pasos li {
+  font-size: 14px;
+  color: var(--text);
+  padding: 8px 0 8px 26px;
+  border-bottom: 1px solid var(--paper);
+  position: relative;
+}
+
+.pasos li:last-child {
+  border-bottom: none;
+}
+
+.pasos li::before {
+  content: counter(step);
+  counter-increment: step;
+  position: absolute;
+  left: 0;
+  top: 8px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--amber-text);
+}
+
+.restart-btn {
+  background: var(--ink);
+  color: #fff;
+  border: none;
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: 14px;
+  padding: 12px 22px;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.restart-btn:hover {
+  background: #0A1730;
+}
+
+/* ---------- Banco ---------- */
+
+.banco {
+  margin-top: 72px;
+}
+
+.banco-head {
+  margin-bottom: 20px;
+}
+
+.banco-head h2 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 20px;
+  color: var(--ink);
+}
+
+.banco-head p {
+  color: var(--text-dim);
+  font-size: 14px;
+  margin-top: 4px;
+  max-width: 60ch;
+}
+
+.banco-cta {
+  border-left: 2px solid var(--amber);
+  padding-left: 10px;
+  margin-top: 10px;
+  font-size: 13px;
+}
+
+.banco-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 14px;
+  margin-top: 20px;
+  padding: 0;
+  list-style: none;
+}
+
+.banco-card {
+  background: var(--paper-2);
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  padding: 18px;
+}
+
+.banco-card .name {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 15px;
+  color: var(--ink);
+  margin-bottom: 6px;
+}
+
+.banco-card .desc {
+  font-size: 13px;
+  color: var(--text-dim);
+  margin-bottom: 10px;
+}
+
+.banco-card a {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--amber-text);
+  text-decoration: none;
+}
+
+.banco-card a:hover {
+  text-decoration: underline;
+}
+
+.banco-card .status {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-dim);
+}
+
+/* ---------- Pie ---------- */
+
+.pie {
+  margin-top: 56px;
+  padding-top: 20px;
+  border-top: 1px solid var(--line);
+}
+
+.pie p {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  line-height: 1.6;
+  color: var(--text-dim);
+  max-width: 60ch;
+}
+
+/* ---------- Responsive ---------- */
+
+@media (max-width: 640px) {
+  .wrap {
+    padding: 32px 16px 64px;
+  }
+
+  .card {
+    padding: 24px 20px;
+  }
+
+  .route {
+    margin: 24px 0 28px;
+  }
+
+  .banco {
+    margin-top: 56px;
+  }
+
+  .banco-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 380px) {
+  .wrap {
+    padding: 24px 12px 48px;
+  }
+
+  .card {
+    padding: 20px 16px;
+  }
+
+  .qtext {
+    font-size: 20px;
+  }
+
+  .opt {
+    padding: 12px 14px;
+  }
+
+  /* A 320px la etiqueta de la ruta compite con la barra: la barra puede ceder. */
+  .route-label {
+    font-size: 10px;
+  }
+}
+
+/* ---------- Movimiento reducido ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    transition-delay: 0ms !important;
+    scroll-behavior: auto !important;
+  }
+}

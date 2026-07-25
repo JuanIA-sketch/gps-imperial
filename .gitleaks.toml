@@ -1,0 +1,12 @@
+# Configuración de gitleaks para GPS Imperial.
+# gitleaks (el motor que usa La Alarma) auto-carga este archivo al escanear la raíz.
+#
+# Este proyecto no tiene secretos, ni reales ni sintéticos: es una página
+# estática sin backend, sin API keys y sin capa de IA. Por eso el allowlist
+# está VACÍO a propósito — nada aquí suprime hallazgos.
+#
+# Si algún día alguien agrega una excepción, que tenga que escribirla explícita
+# en este archivo y justificarla, en vez de que pase inadvertida.
+
+[extend]
+useDefault = true

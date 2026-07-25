@@ -1,0 +1,27 @@
+{
+  "name": "gps-imperial",
+  "version": "1.0.0",
+  "description": "Diagnóstico de 4 preguntas que recomienda UN proyecto concreto para empezar y terminar. Árbol de decisión 100% determinístico, sin capa de IA.",
+  "type": "module",
+  "private": true,
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "dev": "npx --yes serve@14 ."
+  },
+  "keywords": [
+    "juegos-imperiales",
+    "imperio-agentico",
+    "arbol-de-decision",
+    "deterministico",
+    "tdd"
+  ],
+  "license": "MIT",
+  "author": "Juan Carlos Caro (JuanIA-sketch)",
+  "devDependencies": {
+    "vitest": "^4.1.10"
+  }
+}

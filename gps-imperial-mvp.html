@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GPS Imperial — encuentra tu primer proyecto</title>
+<style>
+  :root{
+    --ink:#12213B;
+    --paper:#EDEFF3;
+    --paper-2:#FFFFFF;
+    --line:#C7CDDA;
+    --amber:#E8823D;
+    --amber-dim:#F4C79C;
+    --teal:#3FA796;
+    --text:#1B2A4A;
+    --text-dim:#5B6A87;
+    --font-display: 'Space Grotesk', 'Archivo', sans-serif;
+    --font-body: 'Inter', 'Public Sans', sans-serif;
+    --font-mono: 'IBM Plex Mono', 'Courier New', monospace;
+  }
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    background:var(--paper);
+    color:var(--text);
+    font-family:var(--font-body);
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:820px; margin:0 auto; padding:48px 24px 96px;}
+
+  header.top{margin-bottom:32px;}
+  .eyebrow{
+    font-family:var(--font-mono);
+    font-size:12px;
+    letter-spacing:0.12em;
+    text-transform:uppercase;
+    color:var(--amber);
+    margin-bottom:10px;
+  }
+  h1{
+    font-family:var(--font-display);
+    font-weight:700;
+    font-size:clamp(28px, 5vw, 42px);
+    color:var(--ink);
+    letter-spacing:-0.01em;
+    margin-bottom:12px;
+  }
+  .sub{color:var(--text-dim); font-size:16px; max-width:56ch;}
+
+  /* Ruta / signature element — barra de progreso continua con pin */
+  .route{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    margin:32px 0 40px;
+  }
+  .route-track{
+    flex:1;
+    height:2px;
+    background:var(--line);
+    position:relative;
+    border-radius:2px;
+  }
+  .route-fill{
+    height:100%;
+    background:var(--teal);
+    border-radius:2px;
+    transition:width 0.45s cubic-bezier(.4,0,.2,1);
+    width:0%;
+  }
+  .route-pin{
+    width:20px; height:20px;
+    flex-shrink:0;
+    color:var(--amber);
+    transition:transform 0.3s ease;
+  }
+  .route-label{
+    font-family:var(--font-mono); font-size:11px; color:var(--text-dim);
+    white-space:nowrap;
+  }
+
+  /* Card */
+  .card{
+    background:var(--paper-2);
+    border:1px solid var(--line);
+    border-radius:4px;
+    padding:36px;
+  }
+  .qnum{
+    font-family:var(--font-mono);
+    font-size:12px;
+    color:var(--text-dim);
+    margin-bottom:8px;
+  }
+  .qtext{
+    font-family:var(--font-display);
+    font-weight:500;
+    font-size:22px;
+    color:var(--ink);
+    margin-bottom:24px;
+  }
+  .options{display:flex; flex-direction:column; gap:10px;}
+  .opt{
+    text-align:left;
+    background:var(--paper);
+    border:1px solid var(--line);
+    border-radius:3px;
+    padding:14px 18px;
+    font-family:var(--font-body);
+    font-size:15px;
+    color:var(--text);
+    cursor:pointer;
+    transition:border-color 0.15s ease, background 0.15s ease;
+  }
+  .opt:hover{border-color:var(--amber); background:#FBF3EB;}
+  .opt:focus-visible{outline:2px solid var(--amber); outline-offset:2px;}
+
+  .nav-row{display:flex; justify-content:space-between; margin-top:24px;}
+  .back-btn{
+    background:none; border:none;
+    font-family:var(--font-mono); font-size:13px;
+    color:var(--text-dim); cursor:pointer;
+    padding:8px 0;
+  }
+  .back-btn:disabled{visibility:hidden;}
+
+  /* Result */
+  .result-tag{
+    font-family:var(--font-mono);
+    font-size:12px; letter-spacing:0.1em; text-transform:uppercase;
+    color:var(--teal); margin-bottom:10px;
+  }
+  .result-title{
+    font-family:var(--font-display); font-weight:700;
+    font-size:28px; color:var(--ink); margin-bottom:20px;
+  }
+  .field{margin-bottom:18px;}
+  .field-label{
+    font-family:var(--font-mono); font-size:11px; letter-spacing:0.08em;
+    text-transform:uppercase; color:var(--text-dim); margin-bottom:4px;
+  }
+  .field-value{font-size:15px; color:var(--text);}
+  .pasos{margin-top:8px; padding-left:0; list-style:none;}
+  .pasos li{
+    font-size:14px; color:var(--text); padding:8px 0 8px 26px;
+    border-bottom:1px solid var(--paper); position:relative;
+  }
+  .pasos li:last-child{border-bottom:none;}
+  .pasos li::before{
+    content:counter(step); counter-increment:step;
+    position:absolute; left:0; top:8px;
+    font-family:var(--font-mono); font-size:12px; color:var(--amber);
+  }
+  .pasos{counter-reset:step;}
+  .restart-btn{
+    margin-top:20px;
+    background:var(--ink); color:#fff; border:none;
+    font-family:var(--font-body); font-weight:500; font-size:14px;
+    padding:12px 22px; border-radius:3px; cursor:pointer;
+  }
+  .restart-btn:hover{background:#0A1730;}
+
+  /* Banco */
+  .banco{margin-top:72px;}
+  .banco-head{margin-bottom:20px;}
+  .banco-head h2{
+    font-family:var(--font-display); font-weight:700; font-size:20px; color:var(--ink);
+  }
+  .banco-head p{color:var(--text-dim); font-size:14px; margin-top:4px; max-width:60ch;}
+  .banco-cta{
+    font-size:13px; color:var(--text-dim); margin-top:10px;
+    border-left:2px solid var(--amber); padding-left:10px;
+  }
+  .banco-grid{
+    display:grid; grid-template-columns:repeat(auto-fill, minmax(230px, 1fr));
+    gap:14px; margin-top:20px;
+  }
+  .banco-card{
+    background:var(--paper-2); border:1px solid var(--line); border-radius:3px;
+    padding:18px;
+  }
+  .banco-card .name{font-family:var(--font-display); font-weight:500; font-size:15px; color:var(--ink); margin-bottom:6px;}
+  .banco-card .desc{font-size:13px; color:var(--text-dim); margin-bottom:10px;}
+  .banco-card a{font-family:var(--font-mono); font-size:12px; color:var(--amber); text-decoration:none;}
+  .banco-card a:hover{text-decoration:underline;}
+  .banco-card .status{font-family:var(--font-mono); font-size:11px; color:var(--text-dim);}
+
+  @media (prefers-reduced-motion: reduce){
+    *{transition:none !important;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <div class="eyebrow">Imperio Agéntico · Juegos Imperiales</div>
+    <h1>GPS Imperial</h1>
+    <p class="sub">El GPS decide la ruta, no te pregunta el destino. Responde para quién es esto y qué te duele — nosotros inferimos qué construir.</p>
+  </header>
+
+  <div class="route">
+    <div class="route-track"><div class="route-fill" id="route-fill"></div></div>
+    <div class="route-pin">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s7-6.5 7-12a7 7 0 1 0-14 0c0 5.5 7 12 7 12z"/><circle cx="12" cy="9" r="2.5"/></svg>
+    </div>
+    <div class="route-label" id="route-label">Paso 1</div>
+  </div>
+
+  <main id="app"></main>
+
+  <section class="banco" id="banco-section">
+    <div class="banco-head">
+      <h2>Así se ve un proyecto terminado</h2>
+      <p>No es un portafolio — son ejemplos reales de la comunidad para calibrar qué significa "terminado" antes de que construyas el tuyo.</p>
+      <p class="banco-cta">¿Ya terminaste el tuyo? Publícalo como Logro y pide que lo sumen aquí — el envío automático todavía no existe, esto se cura a mano por ahora.</p>
+    </div>
+    <div class="banco-grid" id="banco-grid"></div>
+  </section>
+
+</div>
+
+<script>
+// ---------- Contenido de resultados por categoría ----------
+const RESULTS = {
+  A: {
+    tag: "Automatización interna",
+    title: "Automatiza algo que ya haces a mano",
+    usuario: "Tú mismo, o alguien con tu mismo rol operativo",
+    problema: "Hay una tarea que repites cada semana con las mismas reglas siempre — no necesitas criterio distinto cada vez, solo ejecutar los mismos pasos rápido y sin error",
+    resultado: "Dejas de hacerlo a mano: el tiempo que hoy le dedicas cada semana se recorta a minutos de revisión",
+    mvp: "Un script o CLI que hace esa tarea de punta a punta — entra el insumo, sale el resultado, sin que tú intervengas en medio",
+    fuera: "Interfaz gráfica, configuración para casos distintos al tuyo, manejo de excepciones raras que casi nunca pasan",
+    tiempoBase: 5, tiempoRango: [3,7],
+    validacion: "Reemplaza la tarea manual por el script durante una semana completa, antes de mostrárselo a nadie",
+    pasos: [
+      "Escribe en una frase exacta qué entra y qué sale de la tarea hoy, a mano",
+      "Automatiza solo esa tarea — nada más, aunque se te ocurran mejoras",
+      "Corre el script en paralelo a tu proceso manual una semana, comparando resultados",
+      "Si coincide siempre, retira el proceso manual"
+    ]
+  },
+  B: {
+    tag: "Agente de datos",
+    title: "Organiza información que hoy está dispersa",
+    usuario: "Alguien que hoy pierde tiempo buscando o cruzando datos manualmente, empezando por ti mismo",
+    problema: "La información que necesitas ya existe, pero está repartida en varios lugares y nadie la consulta sin esfuerzo",
+    resultado: "Una fuente única a la que le preguntas en lenguaje simple, en vez de buscar archivo por archivo",
+    mvp: "Un agente que lee una sola fuente de datos (no varias) y responde preguntas puntuales sobre ella",
+    fuera: "Conectar múltiples fuentes a la vez, editar los datos desde el agente, permisos distintos por usuario",
+    tiempoBase: 10, tiempoRango: [7,14],
+    validacion: "Que alguien que no seas tú le haga 10 preguntas reales y anota dónde falla",
+    pasos: [
+      "Elige UNA fuente de datos concreta, no todas las que se te ocurran",
+      "Haz una lista de las 10 preguntas que la gente hace más seguido sobre esos datos",
+      "Construye solo para responder esas 10, nada más",
+      "Prueba con alguien ajeno antes de agregar una segunda fuente"
+    ]
+  },
+  C: {
+    tag: "Captación de leads",
+    title: "Ayuda a conseguir o calificar clientes",
+    usuario: "Un negocio que necesita más clientes o mejores prospectos",
+    problema: "Encontrar o filtrar prospectos hoy se hace a mano, revisando uno por uno",
+    resultado: "Un flujo que entrega una lista de prospectos ya filtrados, sin que alguien pase horas buscando",
+    mvp: "Una automatización que busca o filtra prospectos según reglas fijas que tú defines — sin IA generativa todavía",
+    fuera: "CRM completo, outreach automático con IA, pagos o integraciones complejas",
+    tiempoBase: 12, tiempoRango: [10,14],
+    validacion: "Consigue que un negocio real lo use con una lista real y te diga si los prospectos sirven",
+    pasos: [
+      "Define las 3 a 5 reglas que hoy usa alguien para decidir si un prospecto sirve",
+      "Automatiza solo el filtro, no el contacto",
+      "Entrégale la primera lista filtrada a un negocio real",
+      "Ajusta las reglas según lo que digan que sí sirvió"
+    ]
+  },
+  D: {
+    tag: "Vertical de sector",
+    title: "Resuelve el problema de tu propio oficio",
+    usuario: "Colegas de tu misma industria o profesión",
+    problema: "Un dolor específico que solo alguien de tu mismo oficio reconoce de inmediato — para cualquier otra persona pasa desapercibido",
+    resultado: "Una herramienta que tu gremio adopta porque le habla en su propio lenguaje, no en jerga genérica de software",
+    mvp: "Una aplicación web simple enfocada en un solo caso de uso de tu sector, nada genérico",
+    fuera: "Soporte para otras industrias, personalización profunda, integraciones con sistemas externos",
+    tiempoBase: 10, tiempoRango: [7,14],
+    validacion: "Pruébalo con 3 colegas reales antes de seguir construyendo cualquier función nueva",
+    pasos: [
+      "Nombra a las 3 personas concretas de tu sector que lo usarían primero",
+      "Pregúntales qué parte del problema les duele más, no asumas",
+      "Construye solo esa parte",
+      "Vuelve con ellos antes de agregar la siguiente función"
+    ]
+  },
+  E: {
+    tag: "Asistente de atención",
+    title: "Responde o atiende a usuarios reales",
+    usuario: "Un negocio o comunidad con volumen de preguntas repetidas",
+    problema: "Las mismas preguntas se responden una y otra vez a mano, y nadie lleva registro de cuáles son",
+    resultado: "Respuestas consistentes e inmediatas para las preguntas frecuentes, sin esperar a que una persona esté disponible",
+    mvp: "Un asistente que cubre las 10 preguntas más frecuentes de un caso concreto, nada más",
+    fuera: "Cobertura de todas las preguntas posibles, escalamiento automático a un humano, soporte multi-idioma",
+    tiempoBase: 8, tiempoRango: [7,10],
+    validacion: "Déjalo responder preguntas reales durante una semana y revisa cada vez que falló",
+    pasos: [
+      "Reúne las 10 preguntas que más se repiten hoy (revisa chats o correos pasados)",
+      "Escribe la respuesta correcta para cada una, a tu manera, no genérica",
+      "Conecta el asistente solo a esas 10",
+      "Cada pregunta nueva que falle, agrégala a la lista para la siguiente versión"
+    ]
+  },
+  F: {
+    tag: "Micro-SaaS",
+    title: "Construye algo que un tercero pagaría por usar",
+    usuario: "Un cliente externo con un problema puntual y presupuesto para resolverlo",
+    problema: "Un dolor específico que hoy resuelven a mano, pagando de más, o simplemente aguantando",
+    resultado: "Una herramienta pequeña y cobrable que resuelve un solo trabajo, bien hecho",
+    mvp: "Una función única, con acceso básico (login simple) y una forma de cobrar, aunque sea manual al inicio",
+    fuera: "Planes múltiples, panel de administración completo, escalar antes de tener el primer cliente pagando",
+    tiempoBase: 17, tiempoRango: [14,21],
+    validacion: "Consigue que una persona ajena a ti pague o se comprometa a pagar antes de seguir construyendo",
+    pasos: [
+      "Encuentra a alguien dispuesto a pagar por esto ANTES de programar la primera línea",
+      "Cóbrale manualmente (transferencia, no un sistema de pagos) la primera vez",
+      "Construye solo la función que le resuelve el problema a esa persona",
+      "Automatiza el cobro solo cuando tengas 2 o 3 clientes reales"
+    ]
+  },
+};
+
+// ---------- Árbol de decisión: el GPS infiere la solución, nunca la pregunta ----------
+const Q1 = {
+  key: "Q1",
+  text: "¿Para quién es esto, hoy mismo?",
+  options: [
+    { label: "Para mí — lo uso yo mismo", next: "Q2_yo" },
+    { label: "Para gente de mi mismo oficio o sector", cat: "D" },
+    { label: "Para un cliente o negocio externo que te pagaría", next: "Q2_cliente" },
+    { label: "Para una audiencia amplia, sin contacto directo todavía", next: "Q2_audiencia" },
+  ]
+};
+
+const BRANCHES = {
+  Q2_yo: {
+    text: "De lo que haces a mano, ¿qué te quita más tiempo?",
+    options: [
+      { label: "Una tarea repetitiva que podrías automatizar", cat: "A" },
+      { label: "Buscar o cruzar información que tienes dispersa", cat: "B" },
+    ]
+  },
+  Q2_cliente: {
+    text: "¿Qué necesita ese negocio de ti?",
+    options: [
+      { label: "Conseguir o calificar más clientes", cat: "C" },
+      { label: "Atender preguntas repetidas de sus usuarios", cat: "E" },
+      { label: "Algo puntual y pequeño que pagaría por usar", cat: "F" },
+    ]
+  },
+  Q2_audiencia: {
+    text: "¿Qué esperaría esa audiencia de ti?",
+    options: [
+      { label: "Respuestas rápidas a sus preguntas", cat: "E" },
+      { label: "Un lugar para organizar o consultar información", cat: "B" },
+    ]
+  }
+};
+
+const Q3 = {
+  key: "Q3",
+  text: "¿Cuántas horas tienes por semana para esto?",
+  options: [
+    { label: "Menos de 5", value: "bajo" },
+    { label: "Entre 5 y 10", value: "medio" },
+    { label: "Más de 10", value: "alto" },
+  ]
+};
+
+const Q4 = {
+  key: "Q4",
+  text: "¿Prefieres trabajar solo o buscar colaboradores?",
+  options: [
+    { label: "Solo, algo que pueda terminar yo mismo", value: "solo" },
+    { label: "Buscando colaboradores que compartan el problema", value: "colaboradores" },
+  ]
+};
+
+// Banco de proyectos: curado a mano, solo con datos confirmados
+const BANCO = [
+  { name: "El Arquitecto", desc: "Diagnóstico pre-mortem de proyectos sobre 10 arquetipos, antes de construir.", link: "https://el-arquitecto.vercel.app", status: null },
+  { name: "Las Llantas", desc: "Un solo comando que empaqueta build + deploy + verificación + rollback.", link: "https://github.com/JuanIA-sketch/las-llantas", status: null },
+  { name: "El Filtro", desc: "Audita dependencias vulnerables o abandonadas en npm y pip, sin jerga técnica.", link: null, status: "en construcción" },
+  { name: "El Doctor", desc: "Puntúa la salud de un proyecto sobre 100 puntos con 14 chequeos.", link: null, status: "publicado" },
+];
+
+// ---------- Estado y navegación ----------
+let state = { audience: null, category: null, hours: null, mode: null };
+let screen = "Q1";
+let history = [];
+const TOTAL_STEPS = 4; // Q1, Q2, Q3, Q4 (Q2 varía en contenido, siempre está presente salvo rama "sector")
+
+const app = document.getElementById("app");
+const routeFill = document.getElementById("route-fill");
+const routeLabel = document.getElementById("route-label");
+
+function progressFor(screenName){
+  const map = { Q1: 0, Q2: 1, Q3: 2, Q4: 3, RESULT: 4 };
+  const idx = screenName.startsWith("Q2") ? 1 : map[screenName];
+  return Math.round((idx / TOTAL_STEPS) * 100);
+}
+
+function updateRoute(){
+  const pct = progressFor(screen);
+  routeFill.style.width = pct + "%";
+  routeLabel.textContent = screen === "RESULT" ? "Destino" : "Paso " + (Math.min(4, progressFor(screen)/25 + 1) | 0);
+}
+
+function goTo(nextScreen){
+  history.push({ screen, state: JSON.parse(JSON.stringify(state)) });
+  screen = nextScreen;
+  render();
+}
+
+function goBack(){
+  if(history.length === 0) return;
+  const prev = history.pop();
+  screen = prev.screen;
+  state = prev.state;
+  render();
+}
+
+function renderGenericQuestion(q, onPick){
+  app.innerHTML = `
+    <div class="card">
+      <div class="qnum">${q.key || ""}</div>
+      <div class="qtext">${q.text}</div>
+      <div class="options">
+        ${q.options.map((opt, i) => `<button class="opt" data-i="${i}">${opt.label}</button>`).join("")}
+      </div>
+      <div class="nav-row">
+        <button class="back-btn" id="back-btn" ${history.length === 0 ? "disabled" : ""}>&larr; Volver</button>
+      </div>
+    </div>
+  `;
+  app.querySelectorAll(".opt").forEach(btn => {
+    btn.addEventListener("click", () => onPick(q.options[parseInt(btn.dataset.i)]));
+  });
+  const backBtn = document.getElementById("back-btn");
+  if(backBtn) backBtn.addEventListener("click", goBack);
+}
+
+function render(){
+  updateRoute();
+
+  if(screen === "Q1"){
+    renderGenericQuestion(Q1, (opt) => {
+      state.audience = opt.label;
+      if(opt.cat){ state.category = opt.cat; goTo("Q3"); }
+      else { goTo(opt.next); }
+    });
+    return;
+  }
+
+  if(screen.startsWith("Q2_")){
+    const branch = BRANCHES[screen];
+    renderGenericQuestion({ key: "", text: branch.text, options: branch.options }, (opt) => {
+      state.category = opt.cat;
+      goTo("Q3");
+    });
+    return;
+  }
+
+  if(screen === "Q3"){
+    renderGenericQuestion(Q3, (opt) => {
+      state.hours = opt.value;
+      goTo("Q4");
+    });
+    return;
+  }
+
+  if(screen === "Q4"){
+    renderGenericQuestion(Q4, (opt) => {
+      state.mode = opt.value;
+      goTo("RESULT");
+    });
+    return;
+  }
+
+  if(screen === "RESULT"){
+    renderResult();
+    return;
+  }
+}
+
+function tiempoTexto(r){
+  const [lo, hi] = r.tiempoRango;
+  if(state.hours === "bajo") return `${hi} días (con menos de 5h/semana, ve con calma hacia el extremo alto)`;
+  if(state.hours === "alto") return `${lo} días (con más de 10h/semana, puedes apuntar al extremo bajo)`;
+  return `${lo} a ${hi} días`;
+}
+
+function validacionTexto(r){
+  let base = r.validacion;
+  if(state.mode === "colaboradores"){
+    base += ". Como prefieres colaborar, alinea primero con tu equipo quién hace qué antes de escribir código.";
+  }
+  return base;
+}
+
+function renderResult(){
+  const r = RESULTS[state.category];
+  app.innerHTML = `
+    <div class="card">
+      <div class="result-tag">${r.tag}</div>
+      <div class="result-title">${r.title}</div>
+      <div class="field"><div class="field-label">Usuario</div><div class="field-value">${r.usuario}</div></div>
+      <div class="field"><div class="field-label">Problema</div><div class="field-value">${r.problema}</div></div>
+      <div class="field"><div class="field-label">Resultado</div><div class="field-value">${r.resultado}</div></div>
+      <div class="field"><div class="field-label">MVP</div><div class="field-value">${r.mvp}</div></div>
+      <div class="field"><div class="field-label">Lo que queda fuera</div><div class="field-value">${r.fuera}</div></div>
+      <div class="field"><div class="field-label">Tiempo estimado</div><div class="field-value">${tiempoTexto(r)}</div></div>
+      <div class="field"><div class="field-label">Cómo validarlo</div><div class="field-value">${validacionTexto(r)}</div></div>
+      <div class="field">
+        <div class="field-label">Próximos pasos</div>
+        <ol class="pasos">${r.pasos.map(p => `<li>${p}</li>`).join("")}</ol>
+      </div>
+      <button class="restart-btn" id="restart-btn">Repetir diagnóstico</button>
+    </div>
+  `;
+  document.getElementById("restart-btn").addEventListener("click", () => {
+    state = { audience: null, category: null, hours: null, mode: null };
+    history = [];
+    screen = "Q1";
+    render();
+  });
+}
+
+function renderBanco(){
+  const grid = document.getElementById("banco-grid");
+  grid.innerHTML = BANCO.map(item => `
+    <div class="banco-card">
+      <div class="name">${item.name}</div>
+      <div class="desc">${item.desc}</div>
+      ${item.link ? `<a href="${item.link}" target="_blank" rel="noopener">Ver proyecto &rarr;</a>` : `<div class="status">${item.status}</div>`}
+    </div>
+  `).join("");
+}
+
+render();
+renderBanco();
+</script>
+</body>
+</html>
