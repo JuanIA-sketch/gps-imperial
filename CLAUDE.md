@@ -67,6 +67,49 @@ Esto es también otra validación real del deployer de Vercel de Las Llantas ant
 
 ## Estado actual
 
-- Lógica completa y testeada; interfaz completa; accesibilidad verificada en Chromium real (foco por teclado con Tab, reduced-motion, 320px sin desbordamiento).
+*Última actualización: 25 de julio de 2026, al cerrar la sesión.*
+
+### 1. Construido y verificado
+
+- **Arquitectura sostenida**: `src/` es lógica pura sin DOM (categorías, árbol, motor de estados, recomendación, banco); `web/app.js` es el único archivo que pinta, junto a `web/mapa.js` que solo mueve el dibujo de la ruta. Ni un `if` de negocio en la capa de vista.
+- **395 tests en verde** (`npm test`), en 6 archivos. Incluye las 48 combinaciones Q1×Q2×Q3×Q4, el candado de que Q3 y Q4 nunca cambian la categoría, la rama sector que salta Q2, el "volver" en cada paso, y el candado de copy literal por categoría.
+- **La Alarma: sin hallazgos**, exit 0.
+- **Rediseño visual completo**: navegación nocturna, mapa a pantalla completa (la página no scrollea nunca), ruta real generada **por rama** —4 maniobras en escalera 32-26-50-44, o 3 maniobras 30-70-52— con cada parada en un giro. Panel lateral en escritorio, hoja inferior anclada abajo en móvil.
+- **Accesibilidad verificada en Chromium real**: foco visible recorriendo con Tab de verdad (no `.focus()` programático), `prefers-reduced-motion` en los dos sentidos, 320px y 390px sin desbordamiento horizontal, contraste AA en el texto pequeño.
+- **Movimiento**: los 3 planes de `plans/` aplicados. El pin va sobre el asfalto con `offset-path` (medido: 0,077 unidades de separación, antes 6,18). El avance dura 420ms, por encima del techo de 300ms de interfaz **a propósito**: es motivo explicativo, no bloquea (acepta otra respuesta a los 302ms con el pin en vuelo) y re-encamina en vez de reiniciar.
+- **Commits locales hechos** (nada empujado a ningún remoto):
+  - `a4ddbe2` GPS Imperial: diagnóstico determinístico de 4 preguntas
+  - `fcf6db5` Contenido del destino: coherencia y campos accionables
+  - `25b56f3` Rediseño visual: navegación nocturna a pantalla completa
+  - `9249411` Arregla el color del pin: estaba ámbar desde la primera pregunta
+
+### 2. Instrucciones de Charly TODAVÍA NO aplicadas
+
+Copiadas literal. Nada de esto está hecho ni confirmado terminado:
+
+- Sacar el banco de proyectos del panel de destino (31% del espacio, confirmado invisible en los 5 viewports medidos) hacia un enlace visible desde cualquier pregunta.
+- Permitir scroll interno solo en el panel de destino (no en las preguntas) y reordenar para que "Próximos pasos" quede justo después del resultado, antes de los 7 campos detallados.
+- Implementar animación #1 (:active táctil en las opciones) y #4 (arrastre real del tirador de la hoja). NO implementar #2 ni #3 — quedan archivadas para después de publicar.
+- Reverificar los 5 viewports, confirmando que "Próximos pasos" es visible sin scroll o con scroll mínimo.
+
+Contexto medido que motivó lo anterior: el panel de destino desborda en los 5 viewports (de +1.380px en 1920×1080 a +2.351px en 320×568), y "Próximos pasos" queda bajo la línea de flotación en **todos**. El reparto del alto: banco 31%, los 7 campos 25%, próximos pasos 12%, ejemplo + herramientas 13%. Las animaciones #1 a #4 son las de la tabla que devolvió `find-animation-opportunities`; #1 es `:active` en `.salida` (hoy no hay ni un `:active` en todo el CSS, y en táctil el hover está gateado, así que tocar una opción no da ninguna respuesta) y #4 es el arrastre del tirador de `.panel::before`, que hoy parece arrastrable y no lo es.
+
+### 3. Detenido esperando confirmación explícita de Charly
+
+Sin excepción, aunque todo lo demás esté en verde:
+
+- `gh repo create`
+- `git push`
+- Deploy con Las Llantas
+
+### 4. Decisiones cerradas — no reabrir
+
+- El **árbol de 4 preguntas es definitivo**.
+- Los **pasos se quedan en 4**, no 5-6.
+- **Q4 no se toca.**
+- **Hosting ya decidido**: Vercel vía Las Llantas.
+
+### Notas operativas que siguen vigentes
+
 - El banco de proyectos tiene 4 entradas curadas a mano. Agregar una es editar `src/banco.js`: `link` **o** `estado`, nunca los dos ni ninguno (hay test).
-- Pendiente: `git push` / repo remoto / deploy — todos esperando confirmación de Charly.
+- `npm run dev` levanta un servidor estático en un puerto libre distinto en cada corrida e imprime la URL. Con `file://` no funciona: el navegador bloquea los módulos ES.
