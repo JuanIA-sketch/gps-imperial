@@ -9,6 +9,11 @@ import {
 // El copy de abajo está transcrito del prototipo validado en vivo
 // (gps-imperial-mvp.html). Es intencionalmente una segunda copia: si alguien
 // "mejora" una frase en src/categorias.js, este fixture lo caza.
+//
+// Tres textos se apartan del prototipo por decisión explícita de Charly, y van
+// marcados donde toca: el `resultado` de B (prometía consolidar varias fuentes
+// cuando el MVP las excluye) y el paso 1 de C y de F (ahora condicionales,
+// para no mandar a la casilla de salida a quien ya tiene cliente).
 const COPY_DEL_PROTOTIPO = {
   A: {
     tag: 'Automatización interna',
@@ -37,8 +42,9 @@ const COPY_DEL_PROTOTIPO = {
       'Alguien que hoy pierde tiempo buscando o cruzando datos manualmente, empezando por ti mismo',
     problema:
       'La información que necesitas ya existe, pero está repartida en varios lugares y nadie la consulta sin esfuerzo',
+    // Reescrito: el original prometía una "fuente única" que el MVP excluye.
     resultado:
-      'Una fuente única a la que le preguntas en lenguaje simple, en vez de buscar archivo por archivo',
+      'Le preguntas en lenguaje simple a la fuente que hoy más te cuesta consultar, y te contesta al momento — en vez de abrirla y buscar a mano',
     mvp: 'Un agente que lee una sola fuente de datos (no varias) y responde preguntas puntuales sobre ella',
     fuera:
       'Conectar múltiples fuentes a la vez, editar los datos desde el agente, permisos distintos por usuario',
@@ -65,7 +71,8 @@ const COPY_DEL_PROTOTIPO = {
     validacion:
       'Consigue que un negocio real lo use con una lista real y te diga si los prospectos sirven',
     pasos: [
-      'Define las 3 a 5 reglas que hoy usa alguien para decidir si un prospecto sirve',
+      // Condicional: quien ya tiene el negocio no empieza de cero.
+      'Si ya tienes un negocio real esperando esto, siéntate con él a definir las 3 a 5 reglas que usa hoy para decidir si un prospecto sirve. Si no, consíguelo antes de programar: sin un negocio concreto no sabes qué filtrar',
       'Automatiza solo el filtro, no el contacto',
       'Entrégale la primera lista filtrada a un negocio real',
       'Ajusta las reglas según lo que digan que sí sirvió',
@@ -125,7 +132,8 @@ const COPY_DEL_PROTOTIPO = {
     validacion:
       'Consigue que una persona ajena a ti pague o se comprometa a pagar antes de seguir construyendo',
     pasos: [
-      'Encuentra a alguien dispuesto a pagar por esto ANTES de programar la primera línea',
+      // Condicional: quien ya tiene a alguien pagando no repite el paso.
+      'Si ya tienes a alguien dispuesto a pagar, salta directo al paso 2. Si no, consíguelo antes de programar la primera línea',
       'Cóbrale manualmente (transferencia, no un sistema de pagos) la primera vez',
       'Construye solo la función que le resuelve el problema a esa persona',
       'Automatiza el cobro solo cuando tengas 2 o 3 clientes reales',

@@ -9,13 +9,6 @@
 import { obtenerCategoria } from './categorias.js';
 import { resolverCategoria } from './arbol.js';
 
-/**
- * Nota que se anexa a "cómo validarlo" cuando la persona prefiere colaborar.
- * Copy del prototipo validado en vivo — no se reescribe.
- */
-export const NOTA_COLABORADORES =
-  '. Como prefieres colaborar, alinea primero con tu equipo quién hace qué antes de escribir código.';
-
 /** Los 7 campos que el brief exige en pantalla, ya renderizados a texto. */
 export const CAMPOS_RECOMENDACION = Object.freeze([
   'usuario',
@@ -34,14 +27,22 @@ export const CAMPOS_RECOMENDACION = Object.freeze([
 const TIEMPO_POR_HORAS = {
   bajo: ({ max }) =>
     `${max} días (con menos de 5h/semana, ve con calma hacia el extremo alto)`,
-  medio: ({ min, max }) => `${min} a ${max} días`,
+  // 5-10 h/semana es el ritmo con el que se calcularon los rangos base, así
+  // que no se ajusta nada. Pero el texto sí reconoce la respuesta: si saliera
+  // idéntico a no haber preguntado, Q3 sería una pregunta inerte.
+  medio: ({ min, max }) => `${min} a ${max} días (tu ritmo estándar, sin ajustes)`,
   alto: ({ min }) =>
     `${min} días (con más de 10h/semana, puedes apuntar al extremo bajo)`,
 };
 
+/**
+ * La nota de colaboradores es propia de cada categoría: "alinea con tu equipo"
+ * no le sirve igual a quien automatiza su propia tarea que a quien le cobra a
+ * un cliente externo.
+ */
 const VALIDACION_POR_MODO = {
-  solo: (validacion) => validacion,
-  colaboradores: (validacion) => validacion + NOTA_COLABORADORES,
+  solo: (categoria) => categoria.validacion,
+  colaboradores: (categoria) => categoria.validacion + categoria.notaColaboradores,
 };
 
 /**
@@ -69,13 +70,15 @@ export function construirRecomendacion({ q1, q2 = null, q3, q4 }) {
     categoria: categoria.id,
     tag: categoria.tag,
     title: categoria.title,
+    ejemplo: categoria.ejemplo,
+    herramientas: categoria.herramientas,
     usuario: categoria.usuario,
     problema: categoria.problema,
     resultado: categoria.resultado,
     mvp: categoria.mvp,
     fuera: categoria.fuera,
     tiempo: formatearTiempo(categoria.tiempoBase),
-    validacion: ajustarValidacion(categoria.validacion),
+    validacion: ajustarValidacion(categoria),
     pasos: categoria.pasos,
   });
 }

@@ -1,7 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import {
   construirRecomendacion,
-  NOTA_COLABORADORES,
   CAMPOS_RECOMENDACION,
 } from '../src/recomendacion.js';
 import { RUTAS_HOJA } from '../src/arbol.js';
@@ -55,9 +54,21 @@ describe('recomendación', () => {
       );
     });
 
-    it.each(porCategoria)('%s: horas medias → el rango completo', (_id, ruta, cat) => {
+    // 5-10 h/semana no mueve el rango, pero el texto tiene que reconocer la
+    // respuesta: si saliera idéntico a no haber preguntado, Q3 sobraría.
+    it.each(porCategoria)('%s: horas medias → el rango completo, y lo dice', (_id, ruta, cat) => {
       const rec = construirRecomendacion({ ...ruta, q3: 'medio', q4: 'solo' });
-      expect(rec.tiempo).toBe(`${cat.tiempoBase.min} a ${cat.tiempoBase.max} días`);
+      expect(rec.tiempo).toBe(
+        `${cat.tiempoBase.min} a ${cat.tiempoBase.max} días (tu ritmo estándar, sin ajustes)`,
+      );
+    });
+
+    it.each(porCategoria)('%s: ninguna respuesta de Q3 deja el texto pelado', (_id, ruta, cat) => {
+      const pelado = `${cat.tiempoBase.min} a ${cat.tiempoBase.max} días`;
+      for (const q3 of HORAS) {
+        const rec = construirRecomendacion({ ...ruta, q3, q4: 'solo' });
+        expect(rec.tiempo).not.toBe(pelado);
+      }
     });
 
     it.each(porCategoria)('%s: muchas horas → el extremo bajo del rango', (_id, ruta, cat) => {
@@ -84,23 +95,34 @@ describe('recomendación', () => {
     }
   });
 
-  // Test 28 — Q4 con colaboradores anexa la nota, sin perder el texto original
+  // Test 28 — Q4 con colaboradores anexa la nota DE SU CATEGORÍA, sin perder
+  // el texto original
   it.each(rutas)('%s: colaboradores anexa la nota a la validación', (_n, ruta) => {
-    const original = CATEGORIAS[ruta.categoria].validacion;
+    const categoria = CATEGORIAS[ruta.categoria];
     const rec = construirRecomendacion({
       ...ruta,
       q3: 'medio',
       q4: 'colaboradores',
     });
-    expect(rec.validacion.startsWith(original)).toBe(true);
-    expect(rec.validacion).toBe(original + NOTA_COLABORADORES);
+    expect(rec.validacion.startsWith(categoria.validacion)).toBe(true);
+    expect(rec.validacion).toBe(categoria.validacion + categoria.notaColaboradores);
+  });
+
+  it('cada categoría tiene su propia nota de colaboradores, no una genérica', () => {
+    const notas = IDS_CATEGORIAS.map((id) => CATEGORIAS[id].notaColaboradores);
+    expect(new Set(notas).size).toBe(6);
+    for (const nota of notas) {
+      expect(nota.startsWith('. ')).toBe(true);
+      expect(nota.trim().length).toBeGreaterThan(60);
+    }
   });
 
   // Test 29 — solo deja la validación intacta
   it.each(rutas)('%s: solo deja la validación idéntica', (_n, ruta) => {
+    const categoria = CATEGORIAS[ruta.categoria];
     const rec = construirRecomendacion({ ...ruta, q3: 'medio', q4: 'solo' });
-    expect(rec.validacion).toBe(CATEGORIAS[ruta.categoria].validacion);
-    expect(rec.validacion).not.toContain(NOTA_COLABORADORES);
+    expect(rec.validacion).toBe(categoria.validacion);
+    expect(rec.validacion).not.toContain(categoria.notaColaboradores);
   });
 
   // Test 30 — Q4 no toca nada más
