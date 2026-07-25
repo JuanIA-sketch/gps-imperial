@@ -109,8 +109,10 @@ Cero desbordamiento horizontal en los 5. Antes, "Próximos pasos" caía bajo la 
 **Tres decisiones de criterio que se tomaron al implementar** (no estaban en la instrucción):
 
 1. **El tirador aparece solo en el destino.** En una pregunta la hoja se ciñe a su contenido: estirarla no revela nada y encogerla recortaría la pregunta. Un tirador ahí sería otra vez la promesa falsa que el cambio venía a quitar. Se descubrió midiendo: con el tirador en las preguntas, arrastrar no movía un píxel.
-2. **La pastilla del banco queda en ícono bajo 400px.** Medido: el rótulo completo son ~170px y en un teléfono no cabe junto a la línea de marca en la misma fila. Conserva el nombre accesible (el `<span>` se recorta, no se oculta con `display:none`) y lleva `title`.
+2. **La pastilla del banco vive en el mapa, no en la fila de la marca**, y bajo 400px es solo ícono. Las dos cosas revisadas y ratificadas por Charly. En móvil no puede anclarse al borde de abajo del mapa: la hoja lo invade (sube a 76dvh, y una pregunta larga más). La franja que siempre existe es la de entre la marca y la hoja — medido, el peor caso son 80px de alto en 320×568 en el destino, entre y=56 e y=136 — así que va fija a `top: 74px`. En apaisado, donde la marca está oculta y esa franja no existe, vuelve a la esquina de arriba. Conserva el nombre accesible (el `<span>` se recorta, no se oculta con `display:none`) y lleva `title`.
 3. **La pastilla va después del panel en el marcado.** Con Tab se contesta la pregunta primero y se sale al banco después.
+
+**Una excepción deliberada a "las preguntas no scrollean", solo en apaisado** (`max-height: 560px`): en 360px de alto una pregunta de cuatro opciones no cabe — medido, a 640×360 le faltan 33px. Con `overflow: hidden` eso escondía una opción para siempre. Ahí, y solo ahí, la pregunta scrollea. En vertical la regla se cumple entera: recorte 0px en los cinco viewports. Entre cumplir la regla al pie y no perder contenido, gana no perder contenido.
 
 ### 3. Detenido esperando confirmación explícita de Charly
 

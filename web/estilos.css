@@ -925,12 +925,17 @@ body {
     padding: 10px clamp(16px, 5vw, 26px) 24px;
   }
 
-  /* Arriba a la derecha: abajo a la izquierda está la hoja, y el lema —que en
-     escritorio ocupa esta zona— aquí está oculto. */
+  /* En el mapa, no en la fila de la marca.
+     Abajo no puede ir: en móvil la hoja invade el mapa (sube hasta 76dvh, y
+     una pregunta larga más), así que cualquier anclaje al borde inferior del
+     mapa queda tapado. La franja que siempre existe es la de entre la marca y
+     la hoja: medida, el peor caso es 80px de alto (320x568 en el destino),
+     entre y=56 y y=136. A 74px la pastilla cae dentro con holgura en los
+     cinco viewports y en las cinco pantallas del recorrido. */
   .banco-abrir {
     left: auto;
     right: clamp(12px, 4vw, 20px);
-    top: clamp(12px, 2vh, 20px);
+    top: 74px;
     bottom: auto;
     padding: 9px 14px;
     font-size: 10px;
@@ -1132,6 +1137,25 @@ body {
 
   .marca {
     display: none;
+  }
+
+  /* Aquí la marca no está y la hoja se queda con el 82%: la franja de en medio
+     desaparece, y la esquina de arriba —que en vertical era de la marca— queda
+     libre. Es el único sitio que no tapa la hoja. */
+  .banco-abrir {
+    top: clamp(10px, 2.5vh, 16px);
+  }
+
+  /* La única excepción al "las preguntas no scrollean", y es a favor del
+     usuario: en 360px de alto una pregunta de cuatro opciones NO cabe —
+     medido, a 640x360 le faltan 33px. Recortarla escondería una opción para
+     siempre; dejarla scrollear la deja alcanzable. Entre cumplir la regla al
+     pie y no perder contenido, gana no perder contenido. En vertical esto no
+     se activa: el recorte medido es 0px en los cinco viewports. El tope deja
+     libre la esquina de la pastilla. */
+  .panel:not(.panel-destino) {
+    max-height: calc(100dvh - 62px);
+    overflow-y: auto;
   }
 
   .lienzo-ruta {
