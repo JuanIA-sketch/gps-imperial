@@ -44,7 +44,7 @@ src/banco.js          entradas del banco (dato puro)
 - Node ≥ 20.
 
 ```bash
-npm test          # 329 tests
+npm test          # 404 tests
 npm run test:watch
 npm run dev       # sirve la carpeta en localhost:3000
 ```
@@ -71,28 +71,46 @@ Esto es también otra validación real del deployer de Vercel de Las Llantas ant
 
 ### 1. Construido y verificado
 
-- **Arquitectura sostenida**: `src/` es lógica pura sin DOM (categorías, árbol, motor de estados, recomendación, banco); `web/app.js` es el único archivo que pinta, junto a `web/mapa.js` que solo mueve el dibujo de la ruta. Ni un `if` de negocio en la capa de vista.
-- **395 tests en verde** (`npm test`), en 6 archivos. Incluye las 48 combinaciones Q1×Q2×Q3×Q4, el candado de que Q3 y Q4 nunca cambian la categoría, la rama sector que salta Q2, el "volver" en cada paso, y el candado de copy literal por categoría.
-- **La Alarma: sin hallazgos**, exit 0.
+- **Arquitectura sostenida**: `src/` es lógica pura sin DOM (categorías, árbol, motor de estados, recomendación, banco); `web/app.js` es el único archivo que pinta, junto a `web/mapa.js` (dibujo de la ruta) y `web/hoja.js` (la hoja arrastrable). Ni un `if` de negocio en la capa de vista.
+- **404 tests en verde** (`npm test`), en 7 archivos. Incluye las 48 combinaciones Q1×Q2×Q3×Q4, el candado de que Q3 y Q4 nunca cambian la categoría, la rama sector que salta Q2, el "volver" en cada paso, y el candado de copy literal por categoría. Los 9 más nuevos son la aritmética del arrastre: vive sin DOM en `web/hoja.js` justamente para poder testearla en Node.
+- **La Alarma: sin hallazgos**, exit 0, sobre el árbol ya commiteado con todo lo de abajo incluido.
 - **Rediseño visual completo**: navegación nocturna, mapa a pantalla completa (la página no scrollea nunca), ruta real generada **por rama** —4 maniobras en escalera 32-26-50-44, o 3 maniobras 30-70-52— con cada parada en un giro. Panel lateral en escritorio, hoja inferior anclada abajo en móvil.
-- **Accesibilidad verificada en Chromium real**: foco visible recorriendo con Tab de verdad (no `.focus()` programático), `prefers-reduced-motion` en los dos sentidos, 320px y 390px sin desbordamiento horizontal, contraste AA en el texto pequeño.
+- **Accesibilidad verificada en Chromium real**: foco visible recorriendo con Tab de verdad (no `.focus()` programático), `prefers-reduced-motion` en los dos sentidos, 320px y 390px sin desbordamiento horizontal, contraste AA en el texto pequeño. Reverificada entera tras el cambio del banco: el orden de Tab pasa por las 4 opciones antes que por la pastilla del banco, el diálogo cierra con Esc y deja el foco en su título, y la página sigue sin scrollear (v:0 h:0).
 - **Movimiento**: los 3 planes de `plans/` aplicados. El pin va sobre el asfalto con `offset-path` (medido: 0,077 unidades de separación, antes 6,18). El avance dura 420ms, por encima del techo de 300ms de interfaz **a propósito**: es motivo explicativo, no bloquea (acepta otra respuesta a los 302ms con el pin en vuelo) y re-encamina en vez de reiniciar.
 - **Commits locales hechos** (nada empujado a ningún remoto):
   - `a4ddbe2` GPS Imperial: diagnóstico determinístico de 4 preguntas
   - `fcf6db5` Contenido del destino: coherencia y campos accionables
   - `25b56f3` Rediseño visual: navegación nocturna a pantalla completa
   - `9249411` Arregla el color del pin: estaba ámbar desde la primera pregunta
+  - `51662e9` Actualiza el estado del proyecto en CLAUDE.md al cerrar la sesión
+  - `6d2040e` Saca el banco del destino y arregla el desbordamiento del panel
 
-### 2. Instrucciones de Charly TODAVÍA NO aplicadas
+### 2. Instrucciones de Charly — APLICADAS el 25 de julio de 2026
 
-Copiadas literal. Nada de esto está hecho ni confirmado terminado:
+Las cuatro, en el commit `6d2040e`. Medido en Chromium real, no estimado:
 
-- Sacar el banco de proyectos del panel de destino (31% del espacio, confirmado invisible en los 5 viewports medidos) hacia un enlace visible desde cualquier pregunta.
-- Permitir scroll interno solo en el panel de destino (no en las preguntas) y reordenar para que "Próximos pasos" quede justo después del resultado, antes de los 7 campos detallados.
-- Implementar animación #1 (:active táctil en las opciones) y #4 (arrastre real del tirador de la hoja). NO implementar #2 ni #3 — quedan archivadas para después de publicar.
-- Reverificar los 5 viewports, confirmando que "Próximos pasos" es visible sin scroll o con scroll mínimo.
+- **Banco fuera del destino**: vive en un `<dialog>` modal que abre una pastilla presente en las 4 preguntas y en el destino. `showModal()` da Esc, trampa de foco y devolución del foco al botón que lo abrió.
+- **Scroll interno solo en el destino**: lo enciende la clase `.panel-destino`. Las preguntas no scrollean **y no se recortan**: la hoja se estira a lo que mida la tarjeta (`.panel:not(.panel-destino)`, tope 92dvh). Recorte medido: 0px en los 5 viewports.
+- **"Próximos pasos" reordenado** a justo después del título, antes de los 7 campos, en ámbar de maniobra.
+- **Animaciones #1 y #4**, solo esas. #2 y #3 siguen archivadas.
 
-Contexto medido que motivó lo anterior: el panel de destino desborda en los 5 viewports (de +1.380px en 1920×1080 a +2.351px en 320×568), y "Próximos pasos" queda bajo la línea de flotación en **todos**. El reparto del alto: banco 31%, los 7 campos 25%, próximos pasos 12%, ejemplo + herramientas 13%. Las animaciones #1 a #4 son las de la tabla que devolvió `find-animation-opportunities`; #1 es `:active` en `.salida` (hoy no hay ni un `:active` en todo el CSS, y en táctil el hover está gateado, así que tocar una opción no da ninguna respuesta) y #4 es el arrastre del tirador de `.panel::before`, que hoy parece arrastrable y no lo es.
+Resultados medidos, antes → después. "Fuera por abajo" es cuánto habría que scrollear para ver el final de "Próximos pasos"; negativo = sobra espacio.
+
+| Viewport | Desborde del panel (antes) | Scroll interno (ahora) | "Próximos pasos" |
+|---|---|---|---|
+| 1920×1080 | +1.380px | 549px | −511px |
+| 1440×900 | — | 729px | −331px |
+| 1024×768 | — | 1.064px | −176px |
+| 390×844 | — | 1.076px | −94px |
+| 320×568 | +2.351px | 1.320px | **+51px** |
+
+Cero desbordamiento horizontal en los 5. Antes, "Próximos pasos" caía bajo la línea de flotación en **todos**; ahora se ve entero sin tocar nada en 4 de 5, y en 320×568 pide 51px — el "scroll mínimo" que Charly aceptó.
+
+**Tres decisiones de criterio que se tomaron al implementar** (no estaban en la instrucción):
+
+1. **El tirador aparece solo en el destino.** En una pregunta la hoja se ciñe a su contenido: estirarla no revela nada y encogerla recortaría la pregunta. Un tirador ahí sería otra vez la promesa falsa que el cambio venía a quitar. Se descubrió midiendo: con el tirador en las preguntas, arrastrar no movía un píxel.
+2. **La pastilla del banco queda en ícono bajo 400px.** Medido: el rótulo completo son ~170px y en un teléfono no cabe junto a la línea de marca en la misma fila. Conserva el nombre accesible (el `<span>` se recorta, no se oculta con `display:none`) y lleva `title`.
+3. **La pastilla va después del panel en el marcado.** Con Tab se contesta la pregunta primero y se sale al banco después.
 
 ### 3. Detenido esperando confirmación explícita de Charly
 
