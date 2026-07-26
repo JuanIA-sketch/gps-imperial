@@ -114,23 +114,40 @@ Cero desbordamiento horizontal en los 5. Antes, "Próximos pasos" caía bajo la 
 
 **Una excepción deliberada a "las preguntas no scrollean", solo en apaisado** (`max-height: 560px`): en 360px de alto una pregunta de cuatro opciones no cabe — medido, a 640×360 le faltan 33px. Con `overflow: hidden` eso escondía una opción para siempre. Ahí, y solo ahí, la pregunta scrollea. En vertical la regla se cumple entera: recorte 0px en los cinco viewports. Entre cumplir la regla al pie y no perder contenido, gana no perder contenido.
 
-### 3. Publicado — GPS Imperial queda cerrado
+### 3. Publicado — GPS Imperial cerrado, con el deploy en pausa
+
+El producto está cerrado y en producción. Lo único abierto no es de este repo: es un arreglo pendiente en Las Llantas, detallado al final de esta sección.
 
 Charly autorizó los tres pasos y están hechos:
 
 - **`gh repo create`** — https://github.com/JuanIA-sketch/gps-imperial, público.
-- **`git push`** — `origin/main` en `9b854b8`.
+- **`git push`** — `origin/main` en `4b074e2`.
 - **En producción**: https://gps-imperial.vercel.app responde 200.
 
-Verificado contra producción, no supuesto: los 5 archivos servidos (`index.html`, `web/estilos.css`, `web/app.js`, `web/hoja.js`, `src/banco.js`) son byte a byte idénticos a `9b854b8` por hash SHA-256, y en Chromium real el diagnóstico completo llega al destino en 4 respuestas sin un solo error de consola.
+Verificado contra producción, no supuesto: los archivos servidos son byte a byte idénticos a `HEAD` por hash SHA-256, y en Chromium real el diagnóstico completo llega al destino en 4 respuestas sin un solo error de consola.
 
 **El banco muestra las 4 entradas con link real, ninguna con estado** — El Filtro y El Doctor pasaron de estado a link cuando sus repos se hicieron públicos.
 
-**Las Llantas desplegó y verificó**, corrida por Charly desde una terminal real. La prueba es `.llantas.json` con `vercelDeployedOnce: true`: esa bandera la escribe solo `onVerified`, que corre únicamente después de que el deploy **y** la verificación con reintentos salen bien. Con eso queda cerrada **la validación del deployer de Vercel de Las Llantas**, que era una de las razones declaradas de este proyecto (ver la sección "Deploy").
+**Las Llantas es la única vía de deploy.** La integración Git de Vercel se desconectó desde el panel. Comprobado por comportamiento, no por configuración —`vercel project inspect` no lista el vínculo Git ni cuando existe, así que ese comando no sirve para esto—: el push de `80523ed` (00:24, con la integración viva) produjo un deployment inmediato con alias `gps-imperial-git-main-…`, y el de `4b074e2` (00:36, ya desconectada) no produjo ninguno en 2 minutos de vigilancia. Ese alias de rama es la marca de agua: Vercel solo lo crea para deployments que vienen del repo conectado.
 
-**Hay dos vías de deploy activas a la vez**, y conviene saberlo antes de tocar nada: la integración Git de Vercel despliega sola en cada push a `main`, y además está Las Llantas. En el historial de producción conviven las dos.
+Por eso **`.llantas.json` está versionado** (`4b074e2`). Su `vercelDeployedOnce: true` es lo que evita la confirmación interactiva del primer deploy; sin el archivo, un agente sin TTY falla con `readline was closed` y no hay pipe que lo salve, porque readline consume el EOF antes de preguntar. Siendo Las Llantas la única vía, ese estado dejó de ser comodidad local.
 
-Lo único que **no** está ejercitado es el rollback, y no por descuido: solo se dispara cuando la verificación falla, y nunca falló. Además, en la corrida que escribió `.llantas.json` el deployer todavía arrancaba con `hasPrevious: false` — no había deployment anterior al cual volver. De aquí en adelante sí lo hay, así que la capacidad está cableada; probada, no. No tratarla como red comprobada.
+**El rollback está ejercitado de verdad**, con una falla real y una reversión real. En la corrida del 26 de julio a las ~00:40 el gate pasó, el deploy se ejecutó (el deployment quedó `● Ready`), **la verificación falló y el rollback completó dejando producción sana**: 200 y hashes idénticos a `HEAD`. No es una capacidad cableada a la espera de que alguien la pruebe — se probó sola, en el peor momento posible, y aguantó.
+
+**Pero el deployer de Vercel de Las Llantas tiene un defecto, y por eso su validación NO está cerrada.** Fue este proyecto el que lo encontró, que era exactamente para lo que servía de banco de pruebas antes de su publish a npm.
+
+El deployer extrae la última URL del stdout de `vercel --prod` —la URL propia del deployment— y verifica esa. Este proyecto tiene la **Deployment Protection** de Vercel activa, así que esa URL responde **302** hacia `vercel.com/sso-api`, mientras que el alias de producción responde **200**:
+
+```
+gps-imperial-kp2poo0fu-….vercel.app   HTTP 302 → vercel.com/sso-api?url=…
+gps-imperial.vercel.app               HTTP 200
+```
+
+El deployer no puede ver un 200 nunca, así que declara fallo y revierte un deploy que estaba bien. **No es transitorio: se repite en cada intento.** Mientras siga así, este proyecto no puede publicar contenido nuevo por su única vía.
+
+Dos arreglos posibles: desactivar Deployment Protection en Vercel (rápido, deja públicas las URLs de deployment), o —lo correcto a nuestro juicio— que Las Llantas verifique **el alias de producción**, no la URL del deployment: un deploy a producción se comprueba donde vive producción.
+
+**El deploy queda en pausa** hasta que Las Llantas tenga ese arreglo. No reintentar antes: fallaría igual y revertiría igual. Producción ya está sana y verificada, así que no hay nada urgente que publicar.
 
 **Un agente sin TTY no puede correr `llantas` en este proyecto la primera vez.** Falla con `readline was closed` (exit 2): la confirmación del primer deploy —`needsConfirmation = config.vercelDeployedOnce !== true`— necesita una terminal real, y por pipe tampoco funciona porque readline consume el EOF antes de preguntar. Ya con `.llantas.json` en su sitio deja de preguntar; si ese archivo se borra, vuelve el bloqueo. **No está versionado**: es estado local.
 
