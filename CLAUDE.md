@@ -114,13 +114,26 @@ Cero desbordamiento horizontal en los 5. Antes, "Próximos pasos" caía bajo la 
 
 **Una excepción deliberada a "las preguntas no scrollean", solo en apaisado** (`max-height: 560px`): en 360px de alto una pregunta de cuatro opciones no cabe — medido, a 640×360 le faltan 33px. Con `overflow: hidden` eso escondía una opción para siempre. Ahí, y solo ahí, la pregunta scrollea. En vertical la regla se cumple entera: recorte 0px en los cinco viewports. Entre cumplir la regla al pie y no perder contenido, gana no perder contenido.
 
-### 3. Detenido esperando confirmación explícita de Charly
+### 3. Publicado — GPS Imperial queda cerrado
 
-Sin excepción, aunque todo lo demás esté en verde:
+Charly autorizó los tres pasos y están hechos:
 
-- `gh repo create`
-- `git push`
-- Deploy con Las Llantas
+- **`gh repo create`** — https://github.com/JuanIA-sketch/gps-imperial, público.
+- **`git push`** — `origin/main` en `9b854b8`.
+- **En producción**: https://gps-imperial.vercel.app responde 200.
+
+Verificado contra producción, no supuesto: los 5 archivos servidos (`index.html`, `web/estilos.css`, `web/app.js`, `web/hoja.js`, `src/banco.js`) son byte a byte idénticos a `9b854b8` por hash SHA-256, y en Chromium real el diagnóstico completo llega al destino en 4 respuestas sin un solo error de consola.
+
+**El banco muestra las 4 entradas con link real, ninguna con estado** — El Filtro y El Doctor pasaron de estado a link cuando sus repos se hicieron públicos.
+
+**Quién desplegó, que importa para la próxima sesión.** No fue Las Llantas: falló dos veces con `readline was closed` (exit 2). Su confirmación del primer deploy —`needsConfirmation = config.vercelDeployedOnce !== true`— necesita una terminal real, y un agente sin TTY no puede contestarla; por pipe tampoco, porque readline consume el EOF antes de preguntar. El deploy lo disparó **la integración Git de Vercel**, que estaba activa y despliega en cada push a `main`.
+
+Consecuencias, para no creer que hay red donde no la hay:
+
+- El gate de Las Llantas pasó en seco (tests 🟢, git-clean 🟢, secret-scan 🟢) pero **no actuó como puerta** del deploy que salió.
+- El 200 lo confirmaron `curl` y Playwright, **no** la verificación con reintentos de Las Llantas, que nunca llegó a correr.
+- **El rollback no se ha ejercitado nunca.** No existe `.llantas.json`, así que `vercelDeployedOnce` sigue sin escribirse y el deployer arranca con `hasPrevious: false`: hoy un rollback no tendría deployment anterior al cual volver. Tratarlo como capacidad probada sería falso.
+- Por lo mismo, **la validación del deployer de Vercel de Las Llantas sigue pendiente** — era una de las razones declaradas de este proyecto (ver la sección "Deploy"). Para cerrarla hace falta correr `llantas` una vez desde una terminal real, o desconectar la integración Git para que sea la única vía.
 
 ### 4. Decisiones cerradas — no reabrir
 
