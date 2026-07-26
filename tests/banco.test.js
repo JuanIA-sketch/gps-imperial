@@ -49,8 +49,8 @@ describe('banco de proyectos', () => {
     expect(porNombre['Las Llantas'].link).toBe(
       'https://github.com/JuanIA-sketch/las-llantas',
     );
-    expect(porNombre['El Filtro'].estado).toBe('en construcción');
-    expect(porNombre['El Doctor'].estado).toBe('publicado');
+    expect(porNombre['El Filtro'].link).toBe('https://github.com/JuanIA-sketch/el-filtro');
+    expect(porNombre['El Doctor'].link).toBe('https://github.com/JuanIA-sketch/el-doctor');
   });
 
   // Test 34 — es vitrina, no parte del diagnóstico

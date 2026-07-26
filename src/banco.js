@@ -29,13 +29,13 @@ export const BANCO = Object.freeze([
     nombre: 'El Filtro',
     descripcion:
       'Audita dependencias vulnerables o abandonadas en npm y pip, sin jerga técnica.',
-    link: null,
-    estado: 'en construcción',
+    link: 'https://github.com/JuanIA-sketch/el-filtro',
+    estado: null,
   }),
   Object.freeze({
     nombre: 'El Doctor',
     descripcion: 'Puntúa la salud de un proyecto sobre 100 puntos con 14 chequeos.',
-    link: null,
-    estado: 'publicado',
+    link: 'https://github.com/JuanIA-sketch/el-doctor',
+    estado: null,
   }),
 ]);
