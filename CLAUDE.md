@@ -126,14 +126,13 @@ Verificado contra producción, no supuesto: los 5 archivos servidos (`index.html
 
 **El banco muestra las 4 entradas con link real, ninguna con estado** — El Filtro y El Doctor pasaron de estado a link cuando sus repos se hicieron públicos.
 
-**Quién desplegó, que importa para la próxima sesión.** No fue Las Llantas: falló dos veces con `readline was closed` (exit 2). Su confirmación del primer deploy —`needsConfirmation = config.vercelDeployedOnce !== true`— necesita una terminal real, y un agente sin TTY no puede contestarla; por pipe tampoco, porque readline consume el EOF antes de preguntar. El deploy lo disparó **la integración Git de Vercel**, que estaba activa y despliega en cada push a `main`.
+**Las Llantas desplegó y verificó**, corrida por Charly desde una terminal real. La prueba es `.llantas.json` con `vercelDeployedOnce: true`: esa bandera la escribe solo `onVerified`, que corre únicamente después de que el deploy **y** la verificación con reintentos salen bien. Con eso queda cerrada **la validación del deployer de Vercel de Las Llantas**, que era una de las razones declaradas de este proyecto (ver la sección "Deploy").
 
-Consecuencias, para no creer que hay red donde no la hay:
+**Hay dos vías de deploy activas a la vez**, y conviene saberlo antes de tocar nada: la integración Git de Vercel despliega sola en cada push a `main`, y además está Las Llantas. En el historial de producción conviven las dos.
 
-- El gate de Las Llantas pasó en seco (tests 🟢, git-clean 🟢, secret-scan 🟢) pero **no actuó como puerta** del deploy que salió.
-- El 200 lo confirmaron `curl` y Playwright, **no** la verificación con reintentos de Las Llantas, que nunca llegó a correr.
-- **El rollback no se ha ejercitado nunca.** No existe `.llantas.json`, así que `vercelDeployedOnce` sigue sin escribirse y el deployer arranca con `hasPrevious: false`: hoy un rollback no tendría deployment anterior al cual volver. Tratarlo como capacidad probada sería falso.
-- Por lo mismo, **la validación del deployer de Vercel de Las Llantas sigue pendiente** — era una de las razones declaradas de este proyecto (ver la sección "Deploy"). Para cerrarla hace falta correr `llantas` una vez desde una terminal real, o desconectar la integración Git para que sea la única vía.
+Lo único que **no** está ejercitado es el rollback, y no por descuido: solo se dispara cuando la verificación falla, y nunca falló. Además, en la corrida que escribió `.llantas.json` el deployer todavía arrancaba con `hasPrevious: false` — no había deployment anterior al cual volver. De aquí en adelante sí lo hay, así que la capacidad está cableada; probada, no. No tratarla como red comprobada.
+
+**Un agente sin TTY no puede correr `llantas` en este proyecto la primera vez.** Falla con `readline was closed` (exit 2): la confirmación del primer deploy —`needsConfirmation = config.vercelDeployedOnce !== true`— necesita una terminal real, y por pipe tampoco funciona porque readline consume el EOF antes de preguntar. Ya con `.llantas.json` en su sitio deja de preguntar; si ese archivo se borra, vuelve el bloqueo. **No está versionado**: es estado local.
 
 ### 4. Decisiones cerradas — no reabrir
 
